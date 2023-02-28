@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Verificar estoque</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Verificar estoque Starbene</h1>
+      <div class="form-group">
+        <label for="produto">Produto:</label>
+        <input type="text" id="produto" class="form-control">
+      </div>
+      <button id="verificar" class="btn btn-primary">Verificar</button>
+      <div id="resultado"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="app.js"></script>
+    <script>
+      $(document).ready(function() {
+        $('#verificar').click(function() {
+          const produto = $('#produto').val();
+  
+          $.ajax({
+            url: `/estoque/${produto}`,
+            success: function(data) {
+              $('#resultado').html(data);
+            },
+            error: function(xhr, status, error) {
+              console.error(error);
+              alert('Ocorreu um erro ao verificar o estoque!');
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
