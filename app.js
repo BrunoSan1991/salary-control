@@ -34,7 +34,7 @@ app.get('/estoque/:produto', (req, res) => {
       return res.send(`O produto "${produto}" não foi encontrado no estoque.`);
     }
 
-    const dataValidade = moment(result[0].data_validade, 'YYYY-MM-DD');
+    const dataValidade = moment(result[0].validade, 'YYYY-MM-DD');
     const hoje = moment();
     const diasRestantes = dataValidade.diff(hoje, 'days');
 
@@ -44,18 +44,6 @@ app.get('/estoque/:produto', (req, res) => {
       return res.send(`O produto "${produto}" tem ${result[0].quantidade} unidades e vence em ${diasRestantes} dias.`);
     }
     
-    
-//     const dataValidade = moment(result[0].data_validade, 'YYYY-MM-DD');
-// const hoje = moment();
-// if (!dataValidade.isValid()) {
-//   return res.send(`A data de validade do produto "${produto}" é inválida.`);
-// }
-// const diasRestantes = dataValidade.diff(hoje, 'days');
-// if (diasRestantes <= 0) {
-//   return res.send(`O produto "${produto}" está vencido.`);
-// } else {
-//   return res.send(`O produto "${produto}" tem ${result[0].quantidade} unidades e vence em ${diasRestantes} dias.`);
-// }
 
   });
 });
