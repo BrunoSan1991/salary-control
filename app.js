@@ -67,7 +67,7 @@ app.get('/estoque/:parametro', (req, res) => {
     sql = `SELECT * FROM produtos WHERE id = ?`;
     values = [parametro];
   }
-
+  
   connection.query(sql, values, (err, result) => {
     if (err) {
       console.error(err);
