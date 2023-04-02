@@ -30,15 +30,15 @@ connection.connect((err) => {
 });
 
 // Rotas
-
+//rota pagina login
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'));
 });
-
+//rota para cadastro
 app.get('/cadastro', (req, res) => {
   res.sendFile(path.join(__dirname, 'cadastro.html'));
 });
-
+//rota para pagina de verificação de produtos
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -92,10 +92,11 @@ app.get('/estoque/:parametro', (req, res) => {
     const diasRestantes = dataValidade.diff(hoje, 'days');
 
     if (diasRestantes <= 0) {
-      return res.send(`O produto "${result[0].nome}" está vencido.`);
+      return res.send(`O produto "${result[0].nome}", da marca "${result[0].marca_do_produto}", está vencido.`);
     } else {
-      return res.send(`O produto "${result[0].nome}" tem ${result[0].quantidade} unidades disponíveis e vence em ${diasRestantes} dias.`);
+      return res.send(`O produto "${result[0].nome}", da marca "${result[0].marca_do_produto}", tem ${result[0].quantidade} unidades disponíveis e vence em ${diasRestantes} dias.`);
     }
+    
   });
 });
 
