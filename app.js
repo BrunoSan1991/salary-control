@@ -5,11 +5,14 @@ const path = require('path');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 
+
 const app = express();
 const port = 3000;
 
 // Middlewares
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({
+  extended: true
+}));
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -30,21 +33,67 @@ connection.connect((err) => {
 });
 
 // Rotas
+app.get('/download', (req, res) => {
+  // criar um novo documento PDF
+  const doc = new PDFDocument();
+
+  // criar um fluxo de saída para salvar o documento PDF
+  const stream = fs.createWriteStream('relatorio.pdf');
+  
+  // adicionar as informações ao documento PDF
+  doc.text('Informações da Tabela');
+  doc.moveDown();
+
+  // Busca as informações da tabela produtos
+  connection.query('SELECT * FROM produtos', function (error, results, fields) {
+    if (error) throw error;
+
+    // Adiciona as informações ao documento
+    results.forEach(produtos => {
+      doc.text(`Codigo: ${produtos.codigo}`);
+      doc.text(`Nome: ${produtos.nome}`);
+      doc.text(`Quantidade: ${produtos.quantidade}`);
+      doc.text(`Validade: ${produtos.validade}`);
+      doc.text(`Marca do produto: ${produtos.marca_do_produto}`);
+      doc.moveDown();
+    });
+
+    // finalizar o documento PDF
+    doc.end();
+
+    // salvar o documento PDF no disco
+    doc.pipe(stream);
+
+    // enviar o arquivo PDF para download
+    stream.on('finish', function () {
+      const file = `${__dirname}/relatorio.pdf`;
+      res.download(file);
+    });
+  });
+});
+
 //rota pagina login
-app.get('/login', (req, res) => {
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'));
+
 });
 //rota para cadastro
 app.get('/cadastro', (req, res) => {
   res.sendFile(path.join(__dirname, 'cadastro.html'));
 });
 //rota para pagina de verificação de produtos
-app.get('/', (req, res) => {
+app.get('/verificar-estoque', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.post('/produtos', (req, res) => {
-  const { codigo, nome, quantidade, validade, marca_do_produto } = req.body;
+  const {
+    codigo,
+    nome,
+    quantidade,
+    validade,
+    marca_do_produto
+  } = req.body;
 
   const sql = `INSERT INTO produtos (codigo, nome, quantidade, validade, marca_do_produto) VALUES (?, ?, ?, ?, ?)`;
   const values = [codigo, nome, quantidade, validade, marca_do_produto];
@@ -57,7 +106,7 @@ app.post('/produtos', (req, res) => {
     }
     console.log("Registro inserido com sucesso!");
     res.send("<script>alert('Registro inserido com sucesso!'); window.location.href='/';</script>");
-    
+
   });
 });
 
@@ -76,7 +125,7 @@ app.get('/estoque/:parametro', (req, res) => {
     sql = `SELECT * FROM produtos WHERE id = ?`;
     values = [parametro];
   }
-  
+
   connection.query(sql, values, (err, result) => {
     if (err) {
       console.error(err);
@@ -96,30 +145,7 @@ app.get('/estoque/:parametro', (req, res) => {
     } else {
       return res.send(`O produto "${result[0].nome}", da marca "${result[0].marca_do_produto}", tem ${result[0].quantidade} unidades disponíveis e vence em ${diasRestantes} dias.`);
     }
-    
-  });
-});
 
-app.get('/relatorio', (req, res) => {
-  const sql = `SELECT p.*, e.quantidade
-               FROM produtos p
-               INNER JOIN estoque e ON p.nome = e.nome
-               WHERE p.nome LIKE '%pesquisa%'`;
-
-  connection.query(sql, (err, results) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).send('Ocorreu um erro ao gerar o relatório!');
-    }
-
-    const doc = new PDFDocument();
-    doc.pipe(fs.createWriteStream('output.pdf'));
-
-    doc.text('Relatório de Produtos', { align: 'center', size: 20, underline: true });
-    doc.moveDown();
-
-    doc.end();
-    res.send('Relatório gerado com sucesso!');
   });
 });
 
