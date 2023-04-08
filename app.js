@@ -75,7 +75,58 @@ app.get('/download', (req, res) => {
 //rota pagina login
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'));
+  
+  
+});
+//rota saidas estoque
+// Rota para retirar produtos do estoque
+// Rota para exibir formulário de retirada de produto
+app.get('/retirar-produto', (req, res) => {
+  res.sendFile(path.join(__dirname, 'retirar-produto.html'));
+});
 
+// Rota para retirar produto do estoque
+app.post('/retirar-produto', (req, res) => {
+  const { produto, quantidade } = req.body;
+
+  // Verifique se o produto e a quantidade foram fornecidos
+  if (!produto || !quantidade) {
+    return res.status(400).send('Produto e quantidade são obrigatórios.');
+  }
+
+  // Verifique se o produto está disponível no estoque
+  connection.query('SELECT quantidade FROM produtos WHERE nome = ?', produto, (error, results) => {
+    if (error) {
+      console.error('Erro ao executar consulta no MySQL: ' + error.stack);
+      return res.status(500).send('Ocorreu um erro ao retirar o produto do estoque.');
+    }
+
+    if (!results || !results.length) {
+      return res.status(404).send('Produto não encontrado no estoque.');
+    }
+
+    const quantidadeDisponivel = results[0].quantidade;
+
+    if (quantidadeDisponivel < quantidade) {
+      return res.status(400).send('Quantidade solicitada maior que a quantidade disponível em estoque.');
+    }
+
+    // Atualize o estoque do produto
+    connection.query('UPDATE produtos SET quantidade = ? WHERE nome = ?', [quantidadeDisponivel - quantidade, produto], (error, results) => {
+      if (error) {
+        console.error('Erro ao executar consulta no MySQL: ' + error.stack);
+        return res.status(500).send('Ocorreu um erro ao retirar o produto do estoque.');
+      }
+       // Redirecione para a página de validação do estoque
+      res.redirect('/verificar-estoque');
+    });
+  });
+});
+
+// Encerre a conexão com o MySQL quando a aplicação for encerrada
+process.on('SIGINT', () => {
+  connection.end();
+  process.exit();
 });
 //rota para cadastro
 app.get('/cadastro', (req, res) => {

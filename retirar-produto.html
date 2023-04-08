@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Retirar Produto</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  </head>
+  <body>
+    <h1>Retirar Produto do Estoque</h1>
+    <form method="POST" action="/retirar-produto">
+      <label for="produto">Produto:</label>
+      <input type="text" id="produto" name="produto" class="form-control" required>
+      <br>
+      <label for="quantidade">Quantidade:</label>
+      <input type="number" class="form-control" id="quantidade" name="quantidade" required>
+      <br>
+      <input type="submit" class="btn btn-primary" value= "Retirar Produto">
+    </form>
+  </body>
+</html>
